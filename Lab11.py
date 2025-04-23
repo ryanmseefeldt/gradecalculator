@@ -1,47 +1,40 @@
 import os
 import matplotlib.pyplot as plt
 
+
 def read_students(file_path):
     students = {}
     with open(file_path, 'r') as f:
         for line in f:
             line = line.strip()
-            # Assuming format is "123Student Name" where 123 is the student ID
+            # Correct format is "123Name" where 123 is the student ID
             if len(line) >= 3:
                 student_id = line[:3]
                 name = line[3:].strip()
                 students[student_id] = name
     return students
 
+
 def read_assignments(file_path):
     assignments = {}
     with open(file_path, 'r') as f:
-        for line in f:
-            line = line.strip()
-            # Check if there are enough characters for the format
-            if len(line) >= 6:  # Minimum for a 5-digit ID and a single character name
-                # Handle Quiz 8 with 4-digit ID specially
-                if "Quiz 8" in line:
-                    # Assuming format for Quiz 8: "1234Quiz 8,25"
-                    assignment_id_length = 4
-                else:
-                    # Assuming format: "12345Assignment Name,25"
-                    assignment_id_length = 5
-
-                assignment_id = line[:assignment_id_length]
-                rest = line[assignment_id_length:]
-
-                # Find where the points value starts (after the last comma)
-                last_comma = rest.rfind(',')
-                if last_comma != -1:
-                    name = rest[:last_comma].strip()
-                    points_str = rest[last_comma + 1:].strip()
-                    try:
-                        points = float(points_str)
-                        assignments[assignment_id] = (name, points)
-                    except ValueError:
-                        print(f"Warning: Invalid points value in line: {line}")
+        lines = f.readlines()
+        i = 0
+        while i < len(lines):
+            # The format is:
+            # Assignment Name
+            # Assignment ID
+            # Points
+            if i + 2 < len(lines):
+                name = lines[i].strip()
+                assignment_id = lines[i + 1].strip()
+                points = float(lines[i + 2].strip())
+                assignments[assignment_id] = (name, points)
+                i += 3
+            else:
+                i += 1
     return assignments
+
 
 def read_submissions(submissions_dir):
     submissions = []
@@ -51,7 +44,7 @@ def read_submissions(submissions_dir):
             with open(file_path, 'r') as f:
                 for line in f:
                     line = line.strip()
-                    # Assuming format: "123|12345|75" for student_id|assignment_id|percentage
+                    # Format: "123|12345|75" for student_id|assignment_id|percentage
                     parts = line.split('|')
                     if len(parts) == 3:
                         student_id, assignment_id, percentage = parts
@@ -60,6 +53,7 @@ def read_submissions(submissions_dir):
                         except ValueError:
                             print(f"Warning: Invalid percentage in submission: {line}")
     return submissions
+
 
 def calculate_student_grade(student_name, students, assignments, submissions):
     # Find student_id by name
@@ -92,6 +86,7 @@ def calculate_student_grade(student_name, students, assignments, submissions):
     grade_percentage = (total_points_earned / total_points_possible) * 100
     print(f"{round(grade_percentage)}%")
 
+
 def calculate_assignment_stats(assignment_name, assignments, submissions):
     # Find assignment_id by name
     assignment_id = None
@@ -99,9 +94,11 @@ def calculate_assignment_stats(assignment_name, assignments, submissions):
         if name.lower() == assignment_name.lower():
             assignment_id = aid
             break
+
     if assignment_id is None:
         print("Assignment not found")
         return
+
     percentages = [s[2] for s in submissions if s[1] == assignment_id]
     if not percentages:
         print("No submissions found for this assignment")
@@ -110,6 +107,7 @@ def calculate_assignment_stats(assignment_name, assignments, submissions):
     print(f"Min: {round(min(percentages))}%")
     print(f"Avg: {round(sum(percentages) / len(percentages))}%")
     print(f"Max: {round(max(percentages))}%")
+
 
 def plot_assignment_histogram(assignment_name, assignments, submissions):
     # Find assignment_id by name
@@ -134,18 +132,19 @@ def plot_assignment_histogram(assignment_name, assignments, submissions):
     plt.ylabel("Number of Students")
     plt.show()
 
+
 def main():
     # File paths
     students_file = 'data/students.txt'
     assignments_file = 'data/assignments.txt'
     submissions_dir = 'data/submissions'
 
-    # Read data and print debug info
+    # Read data
     students = read_students(students_file)
     assignments = read_assignments(assignments_file)
     submissions = read_submissions(submissions_dir)
 
-    # Debug print statements
+    # Print menu
     print("1. Student grade")
     print("2. Assignment statistics")
     print("3. Assignment graph")
@@ -160,6 +159,7 @@ def main():
     elif selection == '3':
         assignment_name = input("What is the assignment name: ")
         plot_assignment_histogram(assignment_name, assignments, submissions)
+
 
 if __name__ == "__main__":
     main()
