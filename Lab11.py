@@ -32,6 +32,7 @@ def read_assignments(file_path):
                 assignments[assignment_id] = (name, float(points))
     return assignments
 
+# Function to read all submission files and return a list of (student_id, assignment_id, percentage)
 def read_submissions(submissions_dir):
     submissions = []
     for filename in os.listdir(submissions_dir):
@@ -43,18 +44,6 @@ def read_submissions(submissions_dir):
                         student_id, assignment_id, percentage = parts
                         submissions.append((student_id, assignment_id, float(percentage)))
     return submissions
-# Function to read all submission files and return a list of (student_id, assignment_id, percentage)
-'''def read_submissions(submissions_dir):
-    submissions = []
-    for filename in os.listdir(submissions_dir):
-        if filename.endswith('.txt'):
-            with open(os.path.join(submissions_dir, filename), 'r') as f:
-                for line in f:
-                    parts = line.strip().split('|')
-                    if len(parts) == 3:
-                        student_id, assignment_id, percentage = parts
-                        submissions.append((student_id, assignment_id, float(percentage)))
-    return submissions'''
 
 # Function to calculate a student's total grade as a percentage
 def calculate_student_grade(student_name, students, assignments, submissions):
@@ -77,12 +66,9 @@ def calculate_student_grade(student_name, students, assignments, submissions):
             percentage = submission[2]
             if assignment_id in assignments:
                 points = assignments[assignment_id][1]
-                total_points_earned += (percentage / 100) * points
-
-    # Calculate and print grade as a percentage
+                total_points_earned += (percentage / 100) * points  # Calculate and print grade as a percentage
     grade_percentage = (total_points_earned / total_points_possible) * 100
     print(f"{round(grade_percentage)}%")
-
 # Function to calculate assignment statistics (min, avg, max percentages)
 def calculate_assignment_stats(assignment_name, assignments, submissions):
     # Find assignment_id by name
